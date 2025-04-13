@@ -8,27 +8,44 @@
     <script src="{{ url_for('static', filename='tailwind.css') }}"></script>
     <title>Image Prediction with TensorFlow.js</title>
 </head>
-<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
 
-    <div class="bg-white p-8 rounded-lg shadow-lg w-[90vw] max-w-md">
-        <h1 class="text-3xl font-semibold text-center text-indigo-600 mb-6">Upload Images for Air Pollution Prediction</h1>
-
-        <form id="imageForm" action="/air_image" method="post" enctype="multipart/form-data" class="space-y-4">
-            <div>
-                <label for="imageInput" class="block text-lg font-medium text-gray-700">Choose images to upload:</label>
-                <input type="file" id="imageInput" name="file" accept="image/*" multiple required class="w-full mt-2 p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600">
+<body>
+    <nav class="bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-center h-16 items-center space-x-8">
+                <a href="{{ url_for('air_image') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    Air Pollution Image Classifier
+                </a>
+                <a href="{{ url_for('aqi_form') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    AQI Regressor
+                </a>
+                <a href="{{ url_for('index') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    Car Price Predictor
+                </a>
             </div>
+        </div>
+    </nav>
+    <div class="bg-gray-100 flex flex-col items-center justify-start pt-10 pb-16">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-[90vw] max-w-md">
+            <h1 class="text-3xl font-semibold text-center text-indigo-600 mb-6">Upload Images for Air Pollution Prediction</h1>
 
-            <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
-                Upload and Predict
-            </button>
-        </form>
-    </div>
+            <form id="imageForm" action="/air_image" method="post" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <label for="imageInput" class="block text-lg font-medium text-gray-700">Choose images to upload:</label>
+                    <input type="file" id="imageInput" name="file" accept="image/*" multiple required class="w-full mt-2 p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600">
+                </div>
 
-    <div class="max-w-6xl px-4 py-10">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Prediction Results</h2>
-        <div id="imageList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Dynamically filled with images and results -->
+                <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                    Upload and Predict
+                </button>
+            </form>
+        </div>
+
+        <div class="max-w-6xl px-4 py-10">
+            <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Prediction Results</h2>
+            <div id="imageList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Dynamically filled with images and results -->
+            </div>
         </div>
     </div>
 

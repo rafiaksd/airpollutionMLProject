@@ -6,157 +6,174 @@
     <title>AQI Predictor : Air Quality Regressor</title>
     <script src="{{ url_for('static', filename='tailwind.css') }}"></script>
 </head>
-<body class="bg-green-100 flex items-center justify-center min-h-screen" id="bg_element">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-lg">
-        <h2 class="text-2xl font-bold text-center mb-4">AQI Predictor</h2>
-        
-        <form action="/aqipredict" method="POST" class="space-y-4">
-            <!-- Peak Hour -->
-            <label class="block text-sm font-medium">Is it Peak Hour?</label>
-            <div class="flex items-center">
-                <input type="radio" name="peak_hour" value="1" class="mr-2" required> Yes
-                <input type="radio" name="peak_hour" value="0" class="ml-4 mr-2" required> No
+<body>
+    <nav class="bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-center h-16 items-center space-x-8">
+                <a href="{{ url_for('air_image') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    Air Pollution Image Classifier
+                </a>
+                <a href="{{ url_for('aqi_form') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    AQI Regressor
+                </a>
+                <a href="{{ url_for('index') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    Car Price Predictor
+                </a>
             </div>
+        </div>
+    </nav>
+    <div class="bg-gray-100 flex flex-col items-center justify-start pt-10 pb-16 h-screen" id="bg_element">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-lg">
+            <h2 class="text-2xl font-bold text-center mb-4">AQI Predictor</h2>
+            
+            <form action="/aqipredict" method="POST" class="space-y-4">
+                <!-- Peak Hour -->
+                <label class="block text-sm font-medium">Is it Peak Hour?</label>
+                <div class="flex items-center">
+                    <input type="radio" name="peak_hour" value="1" class="mr-2" required> Yes
+                    <input type="radio" name="peak_hour" value="0" class="ml-4 mr-2" required> No
+                </div>
 
-            <!-- Raw Concentration (Slider) -->
-            <label class="block text-sm font-medium">Raw Concentration: <span id="rawConcValue">0</span> µg/m³</label>
-            <input id="raw_conc" type="range" name="raw_conc" min="0" max="500" step="0.1" value="0" class="w-full" oninput="updateRawConc(this.value)">
-            <input id="raw_conc_manual" type="number" name="raw_conc_manual" class="w-full p-2 border rounded" value="0" step="0.1" min="0" max="500" oninput="updateRawConcSlider(this.value)">
-            <p id="raw_conc_error" class="text-red-500 text-sm hidden">Value must be between 0 and 500 µg/m³.</p>
+                <!-- Raw Concentration (Slider) -->
+                <label class="block text-sm font-medium">Raw Concentration: <span id="rawConcValue">0</span> µg/m³</label>
+                <input id="raw_conc" type="range" name="raw_conc" min="0" max="500" step="0.1" value="0" class="w-full" oninput="updateRawConc(this.value)">
+                <input id="raw_conc_manual" type="number" name="raw_conc_manual" class="w-full p-2 border rounded" value="0" step="0.1" min="0" max="500" oninput="updateRawConcSlider(this.value)">
+                <p id="raw_conc_error" class="text-red-500 text-sm hidden">Value must be between 0 and 500 µg/m³.</p>
 
-            <!-- Nowcast Concentration (Slider) -->
-            <label class="block text-sm font-medium">Nowcast Concentration: <span id="nowcastConcValue">0</span> µg/m³</label>
-            <input id="nowcast_conc" type="range" name="nowcast_conc" min="0" max="500" step="0.1" value="0" class="w-full" oninput="updateNowConc(this.value)">
-            <input id="nowcast_conc_manual" type="number" name="nowcast_conc_manual" class="w-full p-2 border rounded" value="0" step="0.1" min="0" max="500" oninput="updateNowConcSlider(this.value)">
-            <p id="nowcast_conc_error" class="text-red-500 text-sm hidden">Value must be between 0 and 500 µg/m³.</p>
+                <!-- Nowcast Concentration (Slider) -->
+                <label class="block text-sm font-medium">Nowcast Concentration: <span id="nowcastConcValue">0</span> µg/m³</label>
+                <input id="nowcast_conc" type="range" name="nowcast_conc" min="0" max="500" step="0.1" value="0" class="w-full" oninput="updateNowConc(this.value)">
+                <input id="nowcast_conc_manual" type="number" name="nowcast_conc_manual" class="w-full p-2 border rounded" value="0" step="0.1" min="0" max="500" oninput="updateNowConcSlider(this.value)">
+                <p id="nowcast_conc_error" class="text-red-500 text-sm hidden">Value must be between 0 and 500 µg/m³.</p>
 
-            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Predict AQI</button>
-        </form>
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Predict AQI</button>
+            </form>
 
-        {% if predicted_aqi is not none %}
-            <div class="mt-6 text-center">
-                <h3 class="text-xl font-semibold text-red-500" id="predicted_aqi_element">Predicted AQI: {{ predicted_aqi }}</h3>
-                <p class="text-lg text-gray-700">Air Quality:<span class="font-bold" id="aqi_category_element"> {{ aqi_category }}</span></p>
+            {% if predicted_aqi is not none %}
+                <div class="mt-6 text-center">
+                    <h3 class="text-xl font-semibold text-red-500" id="predicted_aqi_element">Predicted AQI: {{ predicted_aqi }}</h3>
+                    <p class="text-lg text-gray-700">Air Quality:<span class="font-bold" id="aqi_category_element"> {{ aqi_category }}</span></p>
 
-                <!-- predicted for -->
-                <p class="text-sm text-gray-600 italic">Predicted for 
-                    <span class="text-blue-500">Peak Hour: </span><span>{{ peak_hour }}</span>, 
-                    <span class="text-blue-500">Raw Concentration: </span> <span>{{ raw_conc }} µg/m³</span>, 
-                    <span class="text-blue-500">Now Cast Concentration: </span> <span>{{ nowcast_conc }} µg/m³</span>
-                </p>
-            </div>
-        {% endif %}
-    </div>
+                    <!-- predicted for -->
+                    <p class="text-sm text-gray-600 italic">Predicted for 
+                        <span class="text-blue-500">Peak Hour: </span><span>{{ peak_hour }}</span>, 
+                        <span class="text-blue-500">Raw Concentration: </span> <span>{{ raw_conc }} µg/m³</span>, 
+                        <span class="text-blue-500">Now Cast Concentration: </span> <span>{{ nowcast_conc }} µg/m³</span>
+                    </p>
+                </div>
+            {% endif %}
+        </div>
 
-    <script>
-        // Function to update Raw Concentration slider value
-        function updateRawConc(value) {
-            value = parseFloat(value);
-            document.getElementById("rawConcValue").textContent = value; // Update displayed value
-            document.getElementById("raw_conc_manual").value = value; // Sync manual input field
-            checkRawConcError(value);
-        }
-
-        // Function to update Raw Concentration slider when the manual input is changed
-        function updateRawConcSlider(value) {
-            value = parseFloat(value);
-            // Ensure the value stays within the allowed range
-            if (value < 0 || value > 500) {
-                document.getElementById("raw_conc_error").classList.remove("hidden"); // Show error message
-            } else {
-                document.getElementById("raw_conc_error").classList.add("hidden"); // Hide error message
+        <script>
+            // Function to update Raw Concentration slider value
+            function updateRawConc(value) {
+                value = parseFloat(value);
+                document.getElementById("rawConcValue").textContent = value; // Update displayed value
+                document.getElementById("raw_conc_manual").value = value; // Sync manual input field
+                checkRawConcError(value);
             }
 
-            if (value < 0) value = 0;
-            if (value > 500) value = 500;
+            // Function to update Raw Concentration slider when the manual input is changed
+            function updateRawConcSlider(value) {
+                value = parseFloat(value);
+                // Ensure the value stays within the allowed range
+                if (value < 0 || value > 500) {
+                    document.getElementById("raw_conc_error").classList.remove("hidden"); // Show error message
+                } else {
+                    document.getElementById("raw_conc_error").classList.add("hidden"); // Hide error message
+                }
 
-            document.getElementById("raw_conc").value = value; // Sync slider with manual input
-            document.getElementById("rawConcValue").textContent = value; // Update displayed value
-        }
+                if (value < 0) value = 0;
+                if (value > 500) value = 500;
 
-        // Check for Raw Concentration value error
-        function checkRawConcError(value) {
-            if (value < 0 || value > 500) {
-                document.getElementById("raw_conc_error").classList.remove("hidden");
-            } else {
-                document.getElementById("raw_conc_error").classList.add("hidden");
-            }
-        }
-
-        // Function to update Nowcast Concentration slider value
-        function updateNowConc(value) {
-            value = parseFloat(value);
-            document.getElementById("nowcastConcValue").textContent = value; // Update displayed value
-            document.getElementById("nowcast_conc_manual").value = value; // Sync manual input field
-            checkNowConcError(value);
-        }
-
-        // Function to update Nowcast Concentration slider when the manual input is changed
-        function updateNowConcSlider(value) {
-            value = parseFloat(value);
-            // Ensure the value stays within the allowed range
-            if (value < 0 || value > 500) {
-                document.getElementById("nowcast_conc_error").classList.remove("hidden"); // Show error message
-            } else {
-                document.getElementById("nowcast_conc_error").classList.add("hidden"); // Hide error message
+                document.getElementById("raw_conc").value = value; // Sync slider with manual input
+                document.getElementById("rawConcValue").textContent = value; // Update displayed value
             }
 
-            if (value < 0) value = 0;
-            if (value > 500) value = 500;
-
-            document.getElementById("nowcast_conc").value = value; // Sync slider with manual input
-            document.getElementById("nowcastConcValue").textContent = value; // Update displayed value
-        }
-
-        // Check for Nowcast Concentration value error
-        function checkNowConcError(value) {
-            if (value < 0 || value > 500) {
-                document.getElementById("nowcast_conc_error").classList.remove("hidden");
-            } else {
-                document.getElementById("nowcast_conc_error").classList.add("hidden");
+            // Check for Raw Concentration value error
+            function checkRawConcError(value) {
+                if (value < 0 || value > 500) {
+                    document.getElementById("raw_conc_error").classList.remove("hidden");
+                } else {
+                    document.getElementById("raw_conc_error").classList.add("hidden");
+                }
             }
+
+            // Function to update Nowcast Concentration slider value
+            function updateNowConc(value) {
+                value = parseFloat(value);
+                document.getElementById("nowcastConcValue").textContent = value; // Update displayed value
+                document.getElementById("nowcast_conc_manual").value = value; // Sync manual input field
+                checkNowConcError(value);
+            }
+
+            // Function to update Nowcast Concentration slider when the manual input is changed
+            function updateNowConcSlider(value) {
+                value = parseFloat(value);
+                // Ensure the value stays within the allowed range
+                if (value < 0 || value > 500) {
+                    document.getElementById("nowcast_conc_error").classList.remove("hidden"); // Show error message
+                } else {
+                    document.getElementById("nowcast_conc_error").classList.add("hidden"); // Hide error message
+                }
+
+                if (value < 0) value = 0;
+                if (value > 500) value = 500;
+
+                document.getElementById("nowcast_conc").value = value; // Sync slider with manual input
+                document.getElementById("nowcastConcValue").textContent = value; // Update displayed value
+            }
+
+            // Check for Nowcast Concentration value error
+            function checkNowConcError(value) {
+                if (value < 0 || value > 500) {
+                    document.getElementById("nowcast_conc_error").classList.remove("hidden");
+                } else {
+                    document.getElementById("nowcast_conc_error").classList.add("hidden");
+                }
+            }
+
+            // Update background color based on AQI
+            function updateBackgroundColor(predictedAqi) {
+        let bgElement = document.getElementById("bg_element");
+        let aqiCategoryElement = document.getElementById("aqi_category_element");
+
+        // Remove any existing background and text color classes
+        bgElement.classList.remove("bg-green-500", "bg-green-300", "bg-gray-400", "bg-red-300", "bg-red-500", "bg-red-700");
+        aqiCategoryElement.classList.remove("text-green-500","text-green-300", "text-gray-400", "text-red-300", "text-red-500", "text-red-700");
+
+        // Apply background and text color classes based on AQI range
+        if (predictedAqi >= 0 && predictedAqi <= 50) {
+            bgElement.classList.add("bg-green-500");
+            aqiCategoryElement.classList.add("text-green-500"); // Green text for good air quality
+        } else if (predictedAqi >= 51 && predictedAqi <= 100) {
+            bgElement.classList.add("bg-green-300");
+            aqiCategoryElement.classList.add("text-green-300"); // Slightly darker green for moderate air quality
+        } else if (predictedAqi >= 101 && predictedAqi <= 150) {
+            bgElement.classList.add("bg-gray-400");
+            aqiCategoryElement.classList.add("text-gray-400"); // Gray text for unhealthy for sensitive groups
+        } else if (predictedAqi >= 151 && predictedAqi <= 200) {
+            bgElement.classList.add("bg-red-300");
+            aqiCategoryElement.classList.add("text-red-300"); // Red text for unhealthy air quality
+        } else if (predictedAqi >= 201 && predictedAqi <= 300) {
+            bgElement.classList.add("bg-red-500");
+            aqiCategoryElement.classList.add("text-red-500"); // Darker red text for very unhealthy air quality
+        } else if (predictedAqi >= 301) {
+            bgElement.classList.add("bg-red-700");
+            aqiCategoryElement.classList.add("text-red-700"); // Darkest red text for hazardous air quality
         }
-
-        // Update background color based on AQI
-        function updateBackgroundColor(predictedAqi) {
-    let bgElement = document.getElementById("bg_element");
-    let aqiCategoryElement = document.getElementById("aqi_category_element");
-
-    // Remove any existing background and text color classes
-    bgElement.classList.remove("bg-green-500", "bg-green-300", "bg-gray-400", "bg-red-300", "bg-red-500", "bg-red-700");
-    aqiCategoryElement.classList.remove("text-green-500","text-green-300", "text-gray-400", "text-red-300", "text-red-500", "text-red-700");
-
-    // Apply background and text color classes based on AQI range
-    if (predictedAqi >= 0 && predictedAqi <= 50) {
-        bgElement.classList.add("bg-green-500");
-        aqiCategoryElement.classList.add("text-green-500"); // Green text for good air quality
-    } else if (predictedAqi >= 51 && predictedAqi <= 100) {
-        bgElement.classList.add("bg-green-300");
-        aqiCategoryElement.classList.add("text-green-300"); // Slightly darker green for moderate air quality
-    } else if (predictedAqi >= 101 && predictedAqi <= 150) {
-        bgElement.classList.add("bg-gray-400");
-        aqiCategoryElement.classList.add("text-gray-400"); // Gray text for unhealthy for sensitive groups
-    } else if (predictedAqi >= 151 && predictedAqi <= 200) {
-        bgElement.classList.add("bg-red-300");
-        aqiCategoryElement.classList.add("text-red-300"); // Red text for unhealthy air quality
-    } else if (predictedAqi >= 201 && predictedAqi <= 300) {
-        bgElement.classList.add("bg-red-500");
-        aqiCategoryElement.classList.add("text-red-500"); // Darker red text for very unhealthy air quality
-    } else if (predictedAqi >= 301) {
-        bgElement.classList.add("bg-red-700");
-        aqiCategoryElement.classList.add("text-red-700"); // Darkest red text for hazardous air quality
     }
-}
 
 
-        window.onload = function() {
-            const predictedAqiElement = document.getElementById("predicted_aqi_element");
-            const predictedAqi = parseFloat(predictedAqiElement ? predictedAqiElement.innerText.split(":")[1].trim() : "0");
+            window.onload = function() {
+                const predictedAqiElement = document.getElementById("predicted_aqi_element");
+                const predictedAqi = parseFloat(predictedAqiElement ? predictedAqiElement.innerText.split(":")[1].trim() : "0");
 
-            if (!isNaN(predictedAqi)) {
-                updateBackgroundColor(predictedAqi);
+                if (!isNaN(predictedAqi)) {
+                    updateBackgroundColor(predictedAqi);
+                }
             }
-        }
-    </script>
+        </script>
+    </div>
 </body>
 </html>

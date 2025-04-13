@@ -6,52 +6,72 @@
     <title>Car Price Predictor, Rafi</title>
     <script src="{{ url_for('static', filename='tailwind.css') }}"></script>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-lg">
-        <h2 class="text-2xl font-bold text-center mb-4">Car Price Predictor</h2>
-        <form action="/carpredict" method="POST" class="space-y-4">
-            
-            <!-- Company Selection -->
-            <label class="block text-sm font-medium">Select Company</label>
-            <select id="company" name="company" class="w-full p-2 border rounded">
-                {% for company in companies %}
-                <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>{{ company }}</option>
-                {% endfor %}
-            </select>
-            
-            <!-- Car Model Selection -->
-            <label class="block text-sm font-medium">Select Car Model</label>
-            <select id="car_models" name="car_models" class="w-full p-2 border rounded">
-                {% for model in car_models %}
-                <option value="{{ model }}" {% if model == selected_model %}selected{% endif %}>{{ model }}</option>
-                {% endfor %}
-            </select>
-            
-            <!-- Year Selection (Slider) -->
-            <label class="block text-sm font-medium">Year of Purchase: <span id="yearValue">{{ selected_year or 2025 }}</span></label>
-            <input id="year" type="range" name="year" min="1990" max="2025" value="{{ selected_year or 2025 }}" class="w-full" oninput="yearValue.textContent = this.value">
-            
-            <!-- Kilometers Driven (Slider) -->
-            <label class="block text-sm font-medium">Kilometers Driven: <span id="drivenValue">{{ selected_kilo_driven or 100 }}</span></label>
-            <input id="kilo_driven" type="range" name="kilo_driven" min="1" max="10000" step="1" value="{{ selected_kilo_driven or 100 }}" class="w-full" oninput="updateKilometers(this.value)">
-            
-            <!-- Fuel Type Selection -->
-            <label class="block text-sm font-medium">Select Fuel Type</label>
-            <select name="fuel_type" class="w-full p-2 border rounded">
-                {% for fuel in fuel_types %}
-                <option value="{{ fuel }}" {% if fuel == selected_fuel_type %}selected{% endif %}>{{ fuel }}</option>
-                {% endfor %}
-            </select>
-            
-            <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Predict Price</button>
-
-            {% if prediction is not none %}
-            <div class="text-center mb-6">
-                <h2 id="pred_text" class="text-4xl font-semibold text-red-500">Predicted Price: ₹{{ prediction }}</h2>
-                <p class="text-sm text-gray-600 italic">Predicted for <span class="text-blue-500">{{ selected_model }} {{ selected_fuel_type }}, {{ selected_year }}</span>, <span class="text-black">{{ selected_kilo_driven }} km used</span></p>
+<body class="bg-gray-100 min-h-screen">
+    <!-- NAVBAR STARTS HERE -->
+    <nav class="bg-gradient-to-r from-blue-500 to-indigo-600 shadow-md text-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-center h-16 items-center space-x-8">
+                <a href="{{ url_for('air_image') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    Air Pollution Image Classifier
+                </a>
+                <a href="{{ url_for('aqi_form') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    AQI Regressor
+                </a>
+                <a href="{{ url_for('index') }}" class="text-white text-sm hover:text-yellow-300 transition duration-300">
+                    Car Price Predictor
+                </a>
             </div>
-            {% endif %}
-        </form>
+        </div>
+    </nav>
+    <!-- NAVBAR ENDS HERE -->
+
+    <div class="flex items-center justify-center py-12">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-[90vw] max-w-lg">
+            <h2 class="text-2xl font-bold text-center mb-4">Car Price Predictor</h2>
+            <form action="/carpredict" method="POST" class="space-y-4">
+
+                <!-- Company Selection -->
+                <label class="block text-sm font-medium">Select Company</label>
+                <select id="company" name="company" class="w-full p-2 border rounded">
+                    {% for company in companies %}
+                    <option value="{{ company }}" {% if company == selected_company %}selected{% endif %}>{{ company }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Car Model Selection -->
+                <label class="block text-sm font-medium">Select Car Model</label>
+                <select id="car_models" name="car_models" class="w-full p-2 border rounded">
+                    {% for model in car_models %}
+                    <option value="{{ model }}" {% if model == selected_model %}selected{% endif %}>{{ model }}</option>
+                    {% endfor %}
+                </select>
+
+                <!-- Year Selection (Slider) -->
+                <label class="block text-sm font-medium">Year of Purchase: <span id="yearValue">{{ selected_year or 2025 }}</span></label>
+                <input id="year" type="range" name="year" min="1990" max="2025" value="{{ selected_year or 2025 }}" class="w-full" oninput="yearValue.textContent = this.value">
+
+                <!-- Kilometers Driven (Slider) -->
+                <label class="block text-sm font-medium">Kilometers Driven: <span id="drivenValue">{{ selected_kilo_driven or 100 }}</span></label>
+                <input id="kilo_driven" type="range" name="kilo_driven" min="1" max="10000" step="1" value="{{ selected_kilo_driven or 100 }}" class="w-full" oninput="updateKilometers(this.value)">
+
+                <!-- Fuel Type Selection -->
+                <label class="block text-sm font-medium">Select Fuel Type</label>
+                <select name="fuel_type" class="w-full p-2 border rounded">
+                    {% for fuel in fuel_types %}
+                    <option value="{{ fuel }}" {% if fuel == selected_fuel_type %}selected{% endif %}>{{ fuel }}</option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">Predict Price</button>
+
+                {% if prediction is not none %}
+                <div class="text-center mb-6">
+                    <h2 id="pred_text" class="text-4xl font-semibold text-red-500">Predicted Price: ₹{{ prediction }}</h2>
+                    <p class="text-sm text-gray-600 italic">Predicted for <span class="text-blue-500">{{ selected_model }} {{ selected_fuel_type }}, {{ selected_year }}</span>, <span class="text-black">{{ selected_kilo_driven }} km used</span></p>
+                </div>
+                {% endif %}
+            </form>
+        </div>
     </div>
 
     <script>
@@ -65,11 +85,11 @@
             {% endfor %}
         };
 
-        document.getElementById("company").addEventListener("change", function() {
+        document.getElementById("company").addEventListener("change", function () {
             const selectedCompany = this.value;
             const carModelSelect = document.getElementById("car_models");
             carModelSelect.innerHTML = "";
-            
+
             if (carData[selectedCompany]) {
                 carData[selectedCompany].forEach(model => {
                     let option = document.createElement("option");
@@ -87,5 +107,6 @@
             document.getElementById("drivenValue").textContent = closest;
         }
     </script>
+
 </body>
 </html>
