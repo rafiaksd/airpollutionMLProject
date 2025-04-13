@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>-->
+    <script src="{{ url_for('static', filename='tf.js') }}"></script>
+    <script src="{{ url_for('static', filename='tailwind.css') }}"></script>
+    <title>Image Prediction with TensorFlow.js</title>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg w-[90vw] max-w-md">
+        <h1 class="text-3xl font-semibold text-center text-indigo-600 mb-6">Upload Images for Air Pollution Prediction</h1>
+
+        <form id="imageForm" action="/air_image" method="post" enctype="multipart/form-data" class="space-y-4">
+            <div>
+                <label for="imageInput" class="block text-lg font-medium text-gray-700">Choose images to upload:</label>
+                <input type="file" id="imageInput" name="file" accept="image/*" multiple required class="w-full mt-2 p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-indigo-600">
+            </div>
+
+            <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2">
+                Upload and Predict
+            </button>
+        </form>
+    </div>
+
+    <div class="max-w-6xl px-4 py-10">
+        <h2 class="text-2xl font-bold text-center text-gray-800 mb-4">Prediction Results</h2>
+        <div id="imageList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dynamically filled with images and results -->
+        </div>
+    </div>
+
+    <script>
+        if (typeof tf === 'undefined') {
+            console.error('TensorFlow.js is not loaded.');
+            alert('TensorFlow.js is not loaded correctly. Please check the console for errors.');
+        } else {
+            console.log('TensorFlow.js loaded successfully.');
+        }
+
+        let model;
+
+        async function loadModel() {
+            try {
+                model = await tf.loadLayersModel('/static/model.json');
+                console.log('Model loaded successfully');
+            } catch (error) {
+                console.error('Error loading model:', error);
+                alert('Failed to load the model. Please try again later.');
+            }
+        }
+
+        document.getElementById('imageForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('imageInput');
+            const files = fileInput.files;
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append('file', files[i]);
+            }
+
+            const uploadResponse = await fetch('/air_image', {
+                method: 'POST',
+                body: formData
+            });
+
+            const uploadResult = await uploadResponse.json();
+            if (uploadResult.error) {
+                document.getElementById('result').innerHTML = `<p class="text-red-500">UPLOAD Error: ${uploadResult.error}</p>`;
+                return;
+            }
+
+            const imageUrls = uploadResult.images;
+            displayImages(imageUrls);
+
+            imageUrls.forEach(async (imageData) => {
+                const imagePath = imageData.image_url;
+                const imageTensor = await loadAndPreprocessImage(imagePath);
+                const prediction = await model.predict(imageTensor);
+                prediction.array().then(result => {
+                    const result_value = result[0][0];
+                    let result_string = result_value >= 0.5 ? "Polluted" : "Clean";
+                    updatePredictionResult(imagePath, result_string);
+                });
+            });
+        });
+
+        function displayImages(imageUrls) {
+            const imageListContainer = document.getElementById('imageList');
+            imageListContainer.innerHTML = '';
+
+            imageUrls.forEach(imageData => {
+                const imgContainer = document.createElement('div');
+                imgContainer.className = 'bg-white p-3 rounded-xl shadow-lg overflow-hidden group hover:shadow-xl transition-shadow duration-300';
+
+                const imgElement = document.createElement('img');
+                imgElement.src = imageData.image_url;
+                imgElement.alt = "Uploaded Image";
+                imgElement.className = 'w-full h-48 object-cover rounded-md transition-transform duration-300 group-hover:scale-105';
+
+                const resultContainer = document.createElement('div');
+                resultContainer.id = `result-${imageData.image_url}`;
+                resultContainer.className = 'mt-2 text-center text-lg font-semibold text-indigo-600';
+
+                imgContainer.appendChild(imgElement);
+                imgContainer.appendChild(resultContainer);
+                imageListContainer.appendChild(imgContainer);
+            });
+        }
+
+        function updatePredictionResult(imageUrl, result) {
+            const resultContainer = document.getElementById(`result-${imageUrl}`);
+            resultContainer.innerHTML = `${result}`;
+        }
+
+        async function loadAndPreprocessImage(imagePath) {
+            const img = new Image();
+            img.src = imagePath;
+            await img.decode();
+            const tensor = tf.browser.fromPixels(img)
+                .resizeNearestNeighbor([108, 162])
+                .toFloat()
+                .div(tf.scalar(255.0))
+                .expandDims(0);
+            return tensor;
+        }
+
+        loadModel();
+    </script>
+</body>
+</html>
