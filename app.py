@@ -124,7 +124,7 @@ async def delete_images_after_delay(delay:int):
     print(delete_message)
 
 def delete_thread_function():
-    asyncio.run(delete_images_after_delay(120))
+    asyncio.run(delete_images_after_delay(100))
 
 @app.route('/air_image')
 def air_image():
@@ -138,6 +138,10 @@ def air_image_submit():
     files = request.files.getlist('file')  # Get a list of all uploaded files
     if not files:
         return jsonify({"error": "No selected files"})
+    
+    # Ensure the upload directory exists
+    if not os.path.exists(app.config['UPLOAD_FOLDER']):
+        os.makedirs(app.config['UPLOAD_FOLDER'])
 
     image_urls = []
     for file in files:
