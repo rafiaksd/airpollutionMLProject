@@ -31,6 +31,7 @@ def index():
 #car predict post
 @app.route('/carpredict', methods=['POST'])
 def predict():
+    print('Got CAR PREDICT POST Request!!!')
     car_company = request.form.get('company')
     car_model = request.form.get('car_models')
     car_year = request.form.get('year')
@@ -79,6 +80,7 @@ def aqi_form():
 
 @app.route('/aqipredict', methods=['POST'])
 def aqi_predict():
+    print('got AQI Predict POST Request!!!')
     aqi_category = None
     predicted_aqi = None
 
@@ -109,7 +111,7 @@ def allowed_file(filename):
 
 async def delete_images_after_delay(delay:int):
     await asyncio.sleep(delay)
-    
+    print('Going to DELETE IMAGEs Request!!!')
     # Get all files in the uploads folder
     files_in_folder = os.listdir(app.config['UPLOAD_FOLDER'])
     
@@ -132,6 +134,7 @@ def air_image():
 
 @app.route('/air_image', methods=['POST'])
 def air_image_submit():
+    print('Got AIR IMAGE Classification POST Request!!!')
     if 'file' not in request.files:
         return jsonify({"error": "No file part"})
     
@@ -167,4 +170,4 @@ def air_image_submit():
     return jsonify({"images": image_urls})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
