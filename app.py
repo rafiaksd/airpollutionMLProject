@@ -7,7 +7,7 @@ import threading, time, asyncio
 import os
 
 app=Flask(__name__)
-app.secret_key = 'your_secret_key_here'
+app.secret_key = 'your_secret_key_here!'
 
 #handle image uploads
 UPLOAD_FOLDER = 'static/uploads'
